@@ -64,7 +64,7 @@ def upload_folder(folder_path: str) -> List[str]:
     for dirpath, _, filenames in os.walk(folder_path):
         for filename in filenames:
             filepath = os.path.join(dirpath, filename)
-            if filepath.endswith(['jpg', 'png']):
+            if filepath.endswith(('jpg', 'png')):
                 file_list.append(filepath)
 
     img_links = []
