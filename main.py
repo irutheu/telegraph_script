@@ -35,14 +35,26 @@ args = parser.parse_args()
 
 
 
-def upload_img_telegraph(img_path: str) -> str:
+def upload_img_telegraph(img_path: str, retries: int=3) -> str:
     with open(img_path, 'rb') as img_file:
-        result = requests.post(
-            'https://telegra.ph/upload',
-            files={
-                'file': ('file', img_file, 'image/jpg')
-            }
-        ).json()
+        success_flag = True
+        retry_count = 0
+        while success_flag:
+            try:
+                result = requests.post(
+                    'https://telegra.ph/upload',
+                    files={
+                        'file': ('file', img_file, 'image/jpg')
+                    }
+                ).json()
+                success_flag = False
+            except:
+                retry_count += 1
+                if retries == retry_count:
+                    raise Exception(f'Image upload cancelled after {retries}.')
+                print(f'Image upload failed. Retrying for {retries - retry_count} more times...')
+
+
         return result[0]['src']
 
 
@@ -52,7 +64,8 @@ def upload_folder(folder_path: str) -> List[str]:
     for dirpath, _, filenames in os.walk(folder_path):
         for filename in filenames:
             filepath = os.path.join(dirpath, filename)
-            file_list.append(filepath)
+            if filepath.endswith(['jpg', 'png']):
+                file_list.append(filepath)
 
     img_links = []
     for file in tqdm(sorted(file_list)):
