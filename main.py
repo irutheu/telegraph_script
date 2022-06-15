@@ -64,7 +64,7 @@ def upload_folder(folder_path: str) -> List[str]:
     for dirpath, _, filenames in os.walk(folder_path):
         for filename in filenames:
             filepath = os.path.join(dirpath, filename)
-            if filepath.endswith(('jpg', 'png')):
+            if filepath.endswith.lower(('jpg', 'png', 'jpeg', 'gif')):
                 file_list.append(filepath)
 
     img_links = []
@@ -99,4 +99,11 @@ if __name__ == '__main__':
             'content': content,
         }
     ).json()
-    print('Ссылка на страницу:', result['result']['url'])
+
+    try:
+        page_link = result['result']['url']
+        print('Ссылка на страницу:', page_link)
+    except Exception as exc:
+        print('Что-то сломалось, напиши мне и прикрепи скрин с ошибкой:')
+        print(result)
+        print(exc)
