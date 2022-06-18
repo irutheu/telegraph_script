@@ -47,15 +47,13 @@ def upload_img_telegraph(img_path: str, retries: int=3) -> str:
                         'file': ('file', img_file, 'image/jpg')
                     }
                 ).json()
+                return result[0]['src']
                 success_flag = False
             except:
                 retry_count += 1
                 if retries == retry_count:
                     raise Exception(f'Image upload cancelled after {retries}.')
                 print(f'Image upload failed. Retrying for {retries - retry_count} more times...')
-
-
-        return result[0]['src']
 
 
 def upload_folder(folder_path: str) -> List[str]:
