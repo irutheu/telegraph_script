@@ -3,8 +3,10 @@ import json
 import argparse
 from typing import List
 
-import requests
+
 import yaml
+import requests
+from PIL import Image
 from tqdm import tqdm
 
 with open('credentials.yaml', 'r') as stream:
@@ -34,8 +36,25 @@ parser.add_argument('-au', '--author_url',
 args = parser.parse_args()
 
 
+# File size in bytes
+def check_file_size(img_path: str, max_file_size: int=5242879) -> bool:
+    file_size = os.path.getsize(img_path)
+    return True if file_size >= max_file_size else False
+
+
+# Reduce image size by 10 percent
+def rescale_img(img_path: str):
+    img = Image.open(img_path)
+    new_size = (int(size*0.9) for size in img.size)
+    img = img.resize(new_size, Image.LANCZOS)
+    img.save(img_path)
+
 
 def upload_img_telegraph(img_path: str, retries: int=3) -> str:
+    # Rescaling image until its size is acceptable
+    while check_file_size(img_path):
+        rescale_img(img_path)
+
     with open(img_path, 'rb') as img_file:
         success_flag = True
         retry_count = 0
@@ -47,8 +66,8 @@ def upload_img_telegraph(img_path: str, retries: int=3) -> str:
                         'file': ('file', img_file, 'image/jpg')
                     }
                 ).json()
-                return result[0]['src']
-                success_flag = False
+                link = result[0]['src']
+                return link
             except:
                 retry_count += 1
                 if retries == retry_count:
